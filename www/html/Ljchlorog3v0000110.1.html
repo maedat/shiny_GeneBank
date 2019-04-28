@@ -1,0 +1,2173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" content="text/html">
+    <title>
+    Ljchlorog3v0000110.1 - InterPro
+    </title>
+    <meta name="description" content="InterProScan result page: Protein matches and sequence features">
+    <meta name="author" content="InterPro Team, European Bioinformatics Institute">
+
+
+    <link href="resources/css/type_colours.css" rel="stylesheet" type="text/css"/>
+    <link class="database" href="resources/css/database.css" rel="stylesheet" type="text/css"/>
+    <link href="resources/javascript/qtip2/jquery.qtip.css" rel="stylesheet" type="text/css"/>
+    <link href="resources/css/protein.css" rel="stylesheet" type="text/css"/>
+    <script src="resources/javascript/jquery/jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="resources/javascript/jquery/jquery-ui-1.8.17.custom.min.js" type="text/javascript"></script>
+    <script src="resources/javascript/qtip2/jquery.qtip.min.js" type="text/javascript"></script>
+    <script src="resources/javascript/common.js" type="text/javascript"></script>
+    <script src="resources/javascript/protein.js" type="text/javascript"></script>
+    <script src="resources/javascript/protein-popups.js" type="text/javascript"></script>
+    <script src="resources/javascript/jquery/jquery.cookie.js" type="text/javascript"></script>
+    <script src="resources/javascript/jquery/jquery.jscroll.min.js" type="text/javascript"></script>
+
+</head>
+<body>
+<div class="container_24">
+<div class="grid_24 clearfix" id="content" >
+
+    <div class="grid_5 alpha">
+<div id="menu" style="display: none;">
+    <div class="menu-filter">
+
+        <h1>Filter view on</h1>
+
+        <div class="menu-filter-type"><h1>Entry type</h1>
+
+            <fieldset>
+                <div class="disabled">
+                    <input type="checkbox" class="type" id="check-1" value="Homologous_superfamily-row"
+                           checked="checked" disabled="disabled"/>
+                    <label for="check-1" class="homologous-superfamily">Homologous superfamily</label>
+                </div>
+                <div >
+                    <input type="checkbox" class="type" id="check-2" value="Family-row"
+                           checked="checked" />
+                    <label for="check-2" class="family">Family</label>
+                </div>
+                <div >
+                    <input type="checkbox" class="type" id="check-3" value="Domain-row"
+                           checked="checked" />
+                    <label for="check-3" class="domains">Domains</label>
+                </div>
+                <div class="disabled">
+                    <input type="checkbox" class="type" id="check-4" value="Repeat-row"
+                           checked="checked" disabled="disabled"/>
+                    <label for="check-4" class="repeats">Repeats</label>
+                </div>
+                <div >
+                    <input type="checkbox" class="type" id="check-5"
+                           value="SITE-row Conserved_site-row PTM-row Binding_site-row Active_site-row"
+                           checked="checked" />
+                    <label for="check-5" class="site">Site</label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="menu-filter-status"><h1>Status</h1>
+
+            <fieldset>
+                <div >
+                    <input type="checkbox" name="type" id="check-6" value="unintegrated"
+                           checked="checked" />
+                    <label for="check-6" class="uni">Unintegrated</label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="menu-filter-sites"><h1>Per-residue features</h1>
+
+            <fieldset>
+                <div >
+                    <input type="checkbox" name="sites" id="check-7" value="Sites"
+                           checked="checked" />
+                    <label for="check-7">Residue annotation</label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="menu-filter-colour">
+            <div class="filter-colour-head">
+                <div class="filter-colour-title-l">
+                    Colour by
+                </div>
+
+            </div>
+            <fieldset>
+                <input type="radio" name="blobColour" id="domainColour" value="domainColour" checked="checked"/>
+                <label for="domainColour">domain relationship</label> <br/>
+
+                <input type="radio" name="blobColour" id="databaseColour" value="databaseColour"/>
+                <label for="databaseColour">source database</label>
+            </fieldset>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+// Read colour preference from cookie (requires http://plugins.jquery.com/project/Cookie)
+
+            // Retrieve existing cookies and set checkbox states accordingly
+            var checkBoxIDs = ["#check-1", "#check-2", "#check-3", "#check-4", "#check-5", "#check-6", "#check-7"];
+            for (i = 0; i < checkBoxIDs.length; i++) {
+                var checkBoxId = checkBoxIDs[i];
+                var cookieVal = $.cookie(checkBoxId);
+                if (cookieVal != null) {
+                    $(checkBoxId).prop("checked", cookieVal == "true");
+                }
+            }
+
+            // and the radio button group
+            var radioCookieVal = $.cookie("colour-by-domain");
+            if (radioCookieVal != null) {
+                if (radioCookieVal == "true") {
+                    $('#domainColour').prop("checked", true);
+                }
+                else {
+                    $('#databaseColour').prop("checked", true);
+                }
+            }
+
+            // Keep the filter menu in view
+//            $("#menu").jScroll();
+            // CSS switching
+            configureStylesheets($('input[name="blobColour"]:checked').attr('id') == 'domainColour'); // initialise
+
+            $('input[name="blobColour"]').change(function() {
+                configureStylesheets($('input[name="blobColour"]:checked').attr('id') == 'domainColour');
+            });
+
+            // Change event for type checkboxes (Family, Domain etc.)
+            $(".type").change(function() {
+                displayType(this);
+            });
+
+            // Initialise types
+            $(".type").each(function() {
+                displayType(this);
+            });
+
+            // Change event for un-integrated sig matches checkbox
+            $("#check-6").change(function() {
+                displayUnintegrated(this);
+            });
+
+            // Initialise un-integrated.
+            // TODO Work out how to do this without each! Only one thing with an ID of "check-6"!
+            $("#check-6").each(function() {
+                displayUnintegrated(this);
+            });
+
+        // Change event for sites checkbox
+        $("#check-7").change(function() {
+            displaySites(this);
+        });
+
+        // Initialise sites.
+        // TODO Work out how to do this without each! Only one thing with an ID of "check-7"!
+        $("#check-7").each(function() {
+            displaySites(this);
+        });
+
+        // Make the menu visible - Javascript is enabled.
+        $("#menu").css('display', 'block');
+    });
+</script>
+    </div>
+
+    <div class="grid_19 omega main-content">
+        <div class="tab">
+            <div class="Protein_tab">Protein</div>
+        </div>
+
+        <div class="main-box">
+                <h2 class="strapline">Ljchlorog3v0000110.1 </h2>
+<div class="prot_gal">
+
+
+    <div class="prot_gal_bloc">
+        <div class="prot_gal_col"><b>Length</b></div>
+        <div class="prot_gal_desc">201 amino acids
+        </div>
+    </div>
+
+    <br/>
+    <hr/>
+</div>
+
+
+
+
+          <h3>Protein family membership</h3>
+          <div class="Family rel_tree"><ul><li><a href="http://www.ebi.ac.uk/interpro/entry/IPR005709">Ribosomal protein S4, bacterial-type</a><span> (IPR005709)</span></li></ul></div>
+
+
+
+    <h3>Homologous superfamilies</h3>
+
+
+    <div class="prot_sum" style="background:none;">
+    <div class="bot-row">
+        None predicted.
+    </div>
+    </div>
+
+
+    <h3>Domains and repeats</h3>
+
+
+    <div class="prot_sum">
+    <div class="bot-row">
+        <div class="bot-row-line-top"></div>
+        <ol class="signatures">
+
+
+
+    <li class="signature entry-signatures">
+        <div class="bot-row-signame">Domain</div>
+        <div class="bot-row-line">
+            <div class="matches">
+
+
+<span id="supermatch-span-dr-1"
+      class="match c44 Domain"
+      style="left:  0.9950248756%;
+              width: 42.7860696517%;"
+      title="Domain 3 - 88" >
+</span>
+        <div id="supermatch-popup-dr-1" style="display: none;">
+        <div class="popup_topl">
+            <span class="c44 Domain caption_puce"></span>3 - 88
+        </div>
+        <div class="rel_tree"><ul><li class="Domain" ><a href="http://www.ebi.ac.uk/interpro/entry/IPR001912">Ribosomal protein S4/S9, N-terminal</a><span> (IPR001912)</span></li></ul></div>
+    </div>
+
+
+
+
+<span id="supermatch-span-dr-2"
+      class="match c5 Domain"
+      style="left:  43.7810945274%;
+              width: 31.8407960199%;"
+      title="Domain 89 - 152" >
+</span>
+        <div id="supermatch-popup-dr-2" style="display: none;">
+        <div class="popup_topl">
+            <span class="c5 Domain caption_puce"></span>89 - 152
+        </div>
+        <div class="rel_tree"><ul><li class="Domain" ><a href="http://www.ebi.ac.uk/interpro/entry/IPR002942">RNA-binding S4 domain</a><span> (IPR002942)</span></li></ul></div>
+    </div>
+
+
+
+                    <span class="grade" style="left:0%;" title="0"></span>
+                    <span class="grade" style="left:9.9502487562%;" title="20"></span>
+                    <span class="grade" style="left:19.9004975124%;" title="40"></span>
+                    <span class="grade" style="left:29.8507462687%;" title="60"></span>
+                    <span class="grade" style="left:39.8009950249%;" title="80"></span>
+                    <span class="grade" style="left:49.7512437811%;" title="100"></span>
+                    <span class="grade" style="left:59.7014925373%;" title="120"></span>
+                    <span class="grade" style="left:69.6517412935%;" title="140"></span>
+                    <span class="grade" style="left:79.6019900498%;" title="160"></span>
+                    <span class="grade" style="left:89.552238806%;" title="180"></span>
+                    <span class="grade" style="left:100%;" title="201"></span>
+
+            </div>
+        </div>
+    </li>
+
+        </ol>
+        <div class="bot-row-line-bot"></div>
+    </div>
+
+    <div class="prot_scale">
+        <div class="bot-row">
+
+            <div class="bot-row-line">
+                <div style="position:relative;">
+                            <span class="scale_bar" style="left:0%;"
+                                  title="1"></span>
+                                <span class="scale_numb"
+                                      style="left:1%;">1</span>
+                            <span class="scale_bar" style="left:9.9502487562%;"
+                                  title="20"></span>
+                                <span class="scale_numb"
+                                      style="left:9.9502487562%;">20</span>
+                            <span class="scale_bar" style="left:19.9004975124%;"
+                                  title="40"></span>
+                                <span class="scale_numb"
+                                      style="left:19.9004975124%;">40</span>
+                            <span class="scale_bar" style="left:29.8507462687%;"
+                                  title="60"></span>
+                                <span class="scale_numb"
+                                      style="left:29.8507462687%;">60</span>
+                            <span class="scale_bar" style="left:39.8009950249%;"
+                                  title="80"></span>
+                                <span class="scale_numb"
+                                      style="left:39.8009950249%;">80</span>
+                            <span class="scale_bar" style="left:49.7512437811%;"
+                                  title="100"></span>
+                                <span class="scale_numb"
+                                      style="left:49.7512437811%;">100</span>
+                            <span class="scale_bar" style="left:59.7014925373%;"
+                                  title="120"></span>
+                                <span class="scale_numb"
+                                      style="left:59.7014925373%;">120</span>
+                            <span class="scale_bar" style="left:69.6517412935%;"
+                                  title="140"></span>
+                                <span class="scale_numb"
+                                      style="left:69.6517412935%;">140</span>
+                            <span class="scale_bar" style="left:79.6019900498%;"
+                                  title="160"></span>
+                                <span class="scale_numb"
+                                      style="left:79.6019900498%;">160</span>
+                            <span class="scale_bar" style="left:89.552238806%;"
+                                  title="180"></span>
+                                <span class="scale_numb"
+                                      style="left:89.552238806%;">180</span>
+                            <span class="scale_bar" style="left:100%;"
+                                  title="201"></span>
+                                <span class="scale_numb"
+                                      style="left:100%;">201</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    </div>
+
+
+
+    <h3>Detailed signature matches</h3>
+
+
+        <div class="prot_entries">
+            <ol class="entries">
+                    <li class="entry Family-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_family_small.png"
+                                                         alt="Family" title="Family"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR005709">IPR005709</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR005709"
+                                                         class="neutral">Ribosomal protein S4, bacterial-type</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR005709-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://hamap.expasy.org/profile/MF_01306_B" title="MF_01306_B (Ribosomal_S4_B)" class="neutral">
+MF_01306_B
+</a>
+
+        <span>(Ribosom...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="MF_01306_B-span-1"
+      class="match hamap Family"
+      style="left:  0%;
+              width: 99.0049751244%;"
+      title="MF_01306_B 1 - 199" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="MF_01306_B-popup-1" style="display: none;">
+
+    <div class="popup_topl"><span class="hamap Family caption_puce"></span>1 - 199</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>HAMAP</b> <abbr class="icon icon-generic" data-icon="i" title="HAMAP stands for High-quality Automated and Manual Annotation of Proteins. HAMAP profiles are manually created by expert curators. They identify proteins that are part of well-conserved proteins families or subfamilies. HAMAP is based at the SIB Swiss Institute of Bioinformatics, Geneva, Switzerland."></abbr> <br/>
+
+        <a href='http://hamap.expasy.org/profile/MF_01306_B' class="ext">MF_01306_B </a>
+        <span>(Ribosomal_S4_B)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+
+                                    <li id="IPR005709-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+<a href="http://www.jcvi.org/cgi-bin/tigrfams/HmmReportPage.cgi?acc=TIGR01017" title="TIGR01017" class="neutral">
+TIGR01017
+</a>
+
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="TIGR01017-span-2"
+      class="match tigrfams Family"
+      style="left:  0.9950248756%;
+              width: 98.0099502488%;"
+      title="TIGR01017 3 - 199" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="TIGR01017-popup-2" style="display: none;">
+
+    <div class="popup_topl"><span class="tigrfams Family caption_puce"></span>3 - 199</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>TIGRFAMs</b> <abbr class="icon icon-generic" data-icon="i" title="TIGRFAMs is a collection of protein families."></abbr> <br/>
+
+        <a href='http://www.jcvi.org/cgi-bin/tigrfams/HmmReportPage.cgi?acc=TIGR01017' class="ext">TIGR01017 </a>
+        <span>(TIGR01017)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry Domain-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_domain_small.png"
+                                                         alt="Domain" title="Domain"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR001912">IPR001912</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR001912"
+                                                         class="neutral">Ribosomal protein S4/S9, N-terminal</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR001912-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://pfam.xfam.org/family/PF00163" title="PF00163 (Ribosomal_S4)" class="neutral">
+PF00163
+</a>
+
+        <span>(Ribosomal_S4)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="PF00163-span-3"
+      class="match pfam c44 Domain"
+      style="left:  0.9950248756%;
+              width: 42.7860696517%;"
+      title="PF00163 3 - 88" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="PF00163-popup-3" style="display: none;">
+
+    <div class="popup_topl"><span class="pfam c44 Domain caption_puce"></span>3 - 88</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>Pfam</b> <abbr class="icon icon-generic" data-icon="i" title="Pfam is a collection of protein family alignments which were constructed semi-automatically using hidden Markov models (HMMs). Sequences that were not covered by Pfam were clustered and aligned automatically, and are released as Pfam-B. Pfam families have permanent accession numbers and contain functional annotation and cross-references to other databases, while Pfam-B families are re-generated at each release and are unannotated."></abbr> <br/>
+
+        <a href='http://pfam.xfam.org/family/PF00163' class="ext">PF00163 </a>
+        <span>(Ribosomal_S4)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+
+                                    <li id="IPR001912-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://smart.embl-heidelberg.de/smart/do_annotation.pl?ACC=SM01390&amp;BLAST=DUMMY" title="SM01390 (Ribosomal_S4_2)" class="neutral">
+SM01390
+</a>
+
+        <span>(Ribosomal_...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="SM01390-span-4"
+      class="match smart c44 Domain"
+      style="left:  0.9950248756%;
+              width: 42.7860696517%;"
+      title="SM01390 3 - 88" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="SM01390-popup-4" style="display: none;">
+
+    <div class="popup_topl"><span class="smart c44 Domain caption_puce"></span>3 - 88</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>SMART</b> <abbr class="icon icon-generic" data-icon="i" title="SMART (a Simple Modular Architecture Research Tool) uses hidden Markov models (HMMs) and allows the identification of genetically mobile domains and the analysis of domain architectures. These domains are extensively annotated with respect to phyletic distributions, functional class, tertiary structures and functionally important residues."></abbr> <br/>
+
+        <a href='http://smart.embl-heidelberg.de/smart/do_annotation.pl?ACC=SM01390&amp;BLAST=DUMMY' class="ext">SM01390 </a>
+        <span>(Ribosomal_S4_2)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry Domain-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_domain_small.png"
+                                                         alt="Domain" title="Domain"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR002942">IPR002942</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR002942"
+                                                         class="neutral">RNA-binding S4 domain</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR002942-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165" title="cd00165 (S4)" class="neutral">
+cd00165
+</a>
+
+        <span>(S4)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="cd00165-span-5"
+      class="match cdd c5 Domain"
+      style="left:  43.7810945274%;
+              width: 29.8507462687%;"
+      title="cd00165 89 - 148" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="cd00165-popup-5" style="display: none;">
+
+    <div class="popup_topl"><span class="cdd c5 Domain caption_puce"></span>89 - 148</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+
+                                    <li id="IPR002942-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://pfam.xfam.org/family/PF01479" title="PF01479 (S4)" class="neutral">
+PF01479
+</a>
+
+        <span>(S4)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="PF01479-span-6"
+      class="match pfam c5 Domain"
+      style="left:  43.7810945274%;
+              width: 23.8805970149%;"
+      title="PF01479 89 - 136" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="PF01479-popup-6" style="display: none;">
+
+    <div class="popup_topl"><span class="pfam c5 Domain caption_puce"></span>89 - 136</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>Pfam</b> <abbr class="icon icon-generic" data-icon="i" title="Pfam is a collection of protein family alignments which were constructed semi-automatically using hidden Markov models (HMMs). Sequences that were not covered by Pfam were clustered and aligned automatically, and are released as Pfam-B. Pfam families have permanent accession numbers and contain functional annotation and cross-references to other databases, while Pfam-B families are re-generated at each release and are unannotated."></abbr> <br/>
+
+        <a href='http://pfam.xfam.org/family/PF01479' class="ext">PF01479 </a>
+        <span>(S4)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+
+                                    <li id="IPR002942-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://smart.embl-heidelberg.de/smart/do_annotation.pl?ACC=SM00363&amp;BLAST=DUMMY" title="SM00363 (s4_6)" class="neutral">
+SM00363
+</a>
+
+        <span>(s4_6)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="SM00363-span-7"
+      class="match smart c5 Domain"
+      style="left:  43.7810945274%;
+              width: 31.8407960199%;"
+      title="SM00363 89 - 152" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="SM00363-popup-7" style="display: none;">
+
+    <div class="popup_topl"><span class="smart c5 Domain caption_puce"></span>89 - 152</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>SMART</b> <abbr class="icon icon-generic" data-icon="i" title="SMART (a Simple Modular Architecture Research Tool) uses hidden Markov models (HMMs) and allows the identification of genetically mobile domains and the analysis of domain architectures. These domains are extensively annotated with respect to phyletic distributions, functional class, tertiary structures and functionally important residues."></abbr> <br/>
+
+        <a href='http://smart.embl-heidelberg.de/smart/do_annotation.pl?ACC=SM00363&amp;BLAST=DUMMY' class="ext">SM00363 </a>
+        <span>(s4_6)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+
+                                    <li id="IPR002942-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://www.expasy.org/prosite/PS50889" title="PS50889 (S4)" class="neutral">
+PS50889
+</a>
+
+        <span>(S4)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="PS50889-span-8"
+      class="match prosite-profiles c5 Domain"
+      style="left:  43.7810945274%;
+              width: 30.8457711443%;"
+      title="PS50889 89 - 150" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="PS50889-popup-8" style="display: none;">
+
+    <div class="popup_topl"><span class="prosite-profiles c5 Domain caption_puce"></span>89 - 150</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>PROSITE profiles</b> <abbr class="icon icon-generic" data-icon="i" title="PROSITE consists of documentation entries describing protein domains, families and functional sites, as well as associated patterns and profiles to identify them. Profiles and patterns are constructed from manually edited seed alignments. PROSITE is complemented by ProRule, a collection of rules based on profiles and patterns, which increases the discriminatory power of profiles and patterns by providing additional information about functionally and/or structurally critical amino acids."></abbr> <br/>
+
+        <a href='http://www.expasy.org/prosite/PS50889' class="ext">PS50889 </a>
+        <span>(S4)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry SITE-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_site_small.png"
+                                                         alt="SITE" title="SITE"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR018079">IPR018079</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR018079"
+                                                         class="neutral">Ribosomal protein S4, conserved site</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR018079-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://www.expasy.org/prosite/PS00632" title="PS00632 (RIBOSOMAL_S4)" class="neutral">
+PS00632
+</a>
+
+        <span>(RIBOSOMAL_S4)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="PS00632-span-9"
+      class="match prosite-patterns SITE"
+      style="left:  42.7860696517%;
+              width: 12.4378109453%;"
+      title="PS00632 87 - 111" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="PS00632-popup-9" style="display: none;">
+
+    <div class="popup_topl"><span class="prosite-patterns SITE caption_puce"></span>87 - 111</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>PROSITE patterns</b> <abbr class="icon icon-generic" data-icon="i" title="PROSITE consists of documentation entries describing protein domains, families and functional sites, as well as associated patterns and profiles to identify them. Profiles and patterns are constructed from manually edited seed alignments. PROSITE is complemented by ProRule, a collection of rules based on profiles and patterns, which increases the discriminatory power of profiles and patterns by providing additional information about functionally and/or structurally critical amino acids."></abbr> <br/>
+
+        <a href='http://www.expasy.org/prosite/PS00632' class="ext">PS00632 </a>
+        <span>(RIBOSOMAL_S4)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+            </ol>
+        </div>
+
+
+            <div class="prot_entries" id="uni_sign">
+                <div class="top-row">
+                    <div class="top-row-id"><img src="resources/images/ico_type_uni_small.png"
+                                                 alt="Unintegrated signatures" title="Unintegrated signatures"/> no IPR
+                    </div>
+                    <div class="top-row-name">Unintegrated signatures</div>
+                </div>
+                <div class="bot-row">
+                    <div class="bot-row-line-top"></div>
+                    <ol class="signatures">
+                            <li class="signature">
+<div class="bot-row-signame">
+
+            <a href="http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF55174" title="SSF55174 (Alpha-L RNA-binding motif)" class="neutral">
+SSF55174
+</a>
+
+        <span>(Alpha-L R...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="SSF55174-span-10"
+      class="match superfamily uni"
+      style="left:  0.9950248756%;
+              width: 98.0099502488%;"
+      title="SSF55174 3 - 199" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="SSF55174-popup-10" style="display: none;">
+
+    <div class="popup_topl"><span class="superfamily uni caption_puce"></span>3 - 199</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>SUPERFAMILY</b> <abbr class="icon icon-generic" data-icon="i" title="SUPERFAMILY is a library of profile hidden Markov models that represent all proteins of known structure. The library is based on the SCOP classification of proteins. Models correspond to SCOP domains at the superfamily level and a hybrid method subsequently sub-classifies domains at the family level. SUPERFAMILY provides its structural assignments at both levels to all completely sequenced genomes."></abbr> <br/>
+
+        <a href='http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF55174' class="ext">SSF55174 </a>
+        <span>(Alpha-L RNA-binding motif)</span>
+            <br/>
+            Model: 0037616
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:9.9502487562%;" title="20"></span>
+            <span class="grade" style="left:19.9004975124%;" title="40"></span>
+            <span class="grade" style="left:29.8507462687%;" title="60"></span>
+            <span class="grade" style="left:39.8009950249%;" title="80"></span>
+            <span class="grade" style="left:49.7512437811%;" title="100"></span>
+            <span class="grade" style="left:59.7014925373%;" title="120"></span>
+            <span class="grade" style="left:69.6517412935%;" title="140"></span>
+            <span class="grade" style="left:79.6019900498%;" title="160"></span>
+            <span class="grade" style="left:89.552238806%;" title="180"></span>
+            <span class="grade" style="left:100%;" title="201"></span>
+
+    </div>
+
+</div>
+                            </li>
+                    </ol>
+                    <div class="bot-row-line-bot"></div>
+                </div>
+            </div>
+
+        <h3>Other features</h3>
+        <div class="prot_sum">
+            <div class="bot-row">
+                <div class="bot-row-line-top"></div>
+                <ol class="signatures">
+
+        <li class="signature">
+<div class="bot-row-signame">        <!-- Always link using signature accession except for MobiDB: in InterProScan HTML output show homepage, in web protein page show use protein accession-->
+
+
+            <a href="http://mobidb.bio.unipd.it/" title="mobidb-lite (disorder_prediction)" class="neutral">
+mobidb-lite
+</a>
+
+        <span>(disord...)</span>
+
+</div>
+            <div class="bot-row-line">
+                <div class="matches">
+
+
+<span id="mobidb-lite-span-1"
+      class="match mobidb-lite uni"
+      style="left:  9.4527363184%;
+              width: 12.4378109453%;"
+      title="mobidb-lite 20 - 44" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="mobidb-lite-popup-1" style="display: none;">
+
+    <div class="popup_topl"><span class="mobidb-lite uni caption_puce"></span>20 - 44</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>MobiDB Lite</b> <abbr class="icon icon-generic" data-icon="i" title="MobiDB is designed to offer a centralized resource for annotations of intrinsic protein disorder."></abbr> <br/>
+
+            <!-- Always link using signature accession except for MobiDB: in InterProScan HTML output show homepage, in web protein page show use protein accession-->
+        <a href='http://mobidb.bio.unipd.it/' class="ext">mobidb-lite </a>
+        <span>(disorder_prediction)</span>
+    </div>
+</div>
+                        <span class="grade" style="left:0%;" title="0"></span>
+                        <span class="grade" style="left:9.9502487562%;" title="20"></span>
+                        <span class="grade" style="left:19.9004975124%;" title="40"></span>
+                        <span class="grade" style="left:29.8507462687%;" title="60"></span>
+                        <span class="grade" style="left:39.8009950249%;" title="80"></span>
+                        <span class="grade" style="left:49.7512437811%;" title="100"></span>
+                        <span class="grade" style="left:59.7014925373%;" title="120"></span>
+                        <span class="grade" style="left:69.6517412935%;" title="140"></span>
+                        <span class="grade" style="left:79.6019900498%;" title="160"></span>
+                        <span class="grade" style="left:89.552238806%;" title="180"></span>
+                        <span class="grade" style="left:100%;" title="201"></span>
+                </div>
+            </div>
+        </li>
+        <li class="signature">
+<div class="bot-row-signame">        <!-- Always link using signature accession except for MobiDB: in InterProScan HTML output show homepage, in web protein page show use protein accession-->
+
+
+            <a href="http://mobidb.bio.unipd.it/" title="mobidb-lite (Polar)" class="neutral">
+mobidb-lite
+</a>
+
+                <span>(Polar)</span>
+
+
+</div>
+            <div class="bot-row-line">
+                <div class="matches">
+
+
+<span id="mobidb-lite-span-2"
+      class="match mobidb-lite uni"
+      style="left:  12.9353233831%;
+              width: 7.4626865672%;"
+      title="mobidb-lite 27 - 41" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="mobidb-lite-popup-2" style="display: none;">
+
+    <div class="popup_topl"><span class="mobidb-lite uni caption_puce"></span>27 - 41</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>MobiDB Lite</b> <abbr class="icon icon-generic" data-icon="i" title="MobiDB is designed to offer a centralized resource for annotations of intrinsic protein disorder."></abbr> <br/>
+
+            <!-- Always link using signature accession except for MobiDB: in InterProScan HTML output show homepage, in web protein page show use protein accession-->
+        <a href='http://mobidb.bio.unipd.it/' class="ext">mobidb-lite </a>
+        <span>(disorder_prediction)</span>
+            <br/>
+            Feature: Polar
+    </div>
+</div>
+                        <span class="grade" style="left:0%;" title="0"></span>
+                        <span class="grade" style="left:9.9502487562%;" title="20"></span>
+                        <span class="grade" style="left:19.9004975124%;" title="40"></span>
+                        <span class="grade" style="left:29.8507462687%;" title="60"></span>
+                        <span class="grade" style="left:39.8009950249%;" title="80"></span>
+                        <span class="grade" style="left:49.7512437811%;" title="100"></span>
+                        <span class="grade" style="left:59.7014925373%;" title="120"></span>
+                        <span class="grade" style="left:69.6517412935%;" title="140"></span>
+                        <span class="grade" style="left:79.6019900498%;" title="160"></span>
+                        <span class="grade" style="left:89.552238806%;" title="180"></span>
+                        <span class="grade" style="left:100%;" title="201"></span>
+                </div>
+            </div>
+        </li>
+
+                </ol>
+                <div class="bot-row-line-bot"></div>
+            </div>
+        </div>
+
+            <div id="sites">
+            <h3>Residue annotation</h3>
+            <div class="prot_sum">
+                <div class="bot-row">
+                    <div class="bot-row-line-top"></div>
+                    <ol class="signatures">
+                            <li class="signature">
+                                <div class="bot-row-signame">
+                                            <span title="RNA binding surface cd00165">RNA binding surfac...</span>
+                                </div>
+                                <div class="bot-row-line">
+                            <div class="matches">
+
+
+
+
+<span id="residue-span-1"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  44.2786069652%;
+              width: 0.4975124378%;"
+      title="R 90 - 90" >
+</span>
+        <div id="residue-popup-1" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    90R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            <b>
+            90R,
+            </b>
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-2"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  50.2487562189%;
+              width: 0.4975124378%;"
+      title="S 102 - 102" >
+</span>
+        <div id="residue-popup-2" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    102S
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            <b>
+            102S,
+            </b>
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-3"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  50.7462686567%;
+              width: 0.4975124378%;"
+      title="T 103 - 103" >
+</span>
+        <div id="residue-popup-3" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    103T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            <b>
+            103T,
+            </b>
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-4"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  51.7412935323%;
+              width: 0.4975124378%;"
+      title="P 105 - 105" >
+</span>
+        <div id="residue-popup-4" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    105P
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            <b>
+            105P,
+            </b>
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-5"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  52.2388059701%;
+              width: 0.4975124378%;"
+      title="Q 106 - 106" >
+</span>
+        <div id="residue-popup-5" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    106Q
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            <b>
+            106Q,
+            </b>
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-6"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  53.2338308458%;
+              width: 0.4975124378%;"
+      title="R 108 - 108" >
+</span>
+        <div id="residue-popup-6" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    108R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            <b>
+            108R,
+            </b>
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-7"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  53.7313432836%;
+              width: 0.4975124378%;"
+      title="Q 109 - 109" >
+</span>
+        <div id="residue-popup-7" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    109Q
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            <b>
+            109Q,
+            </b>
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-8"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  55.223880597%;
+              width: 0.4975124378%;"
+      title="N 112 - 112" >
+</span>
+        <div id="residue-popup-8" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    112N
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            <b>
+            112N,
+            </b>
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-9"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  55.7213930348%;
+              width: 0.4975124378%;"
+      title="H 113 - 113" >
+</span>
+        <div id="residue-popup-9" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    113H
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            <b>
+            113H,
+            </b>
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-10"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  56.7164179104%;
+              width: 0.4975124378%;"
+      title="H 115 - 115" >
+</span>
+        <div id="residue-popup-10" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    115H
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            <b>
+            115H,
+            </b>
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-11"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  60.1990049751%;
+              width: 0.4975124378%;"
+      title="I 122 - 122" >
+</span>
+        <div id="residue-popup-11" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    122I
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            <b>
+            122I,
+            </b>
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-12"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  60.6965174129%;
+              width: 0.4975124378%;"
+      title="V 123 - 123" >
+</span>
+        <div id="residue-popup-12" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    123V
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            <b>
+            123V,
+            </b>
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-13"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  61.1940298507%;
+              width: 0.4975124378%;"
+      title="D 124 - 124" >
+</span>
+        <div id="residue-popup-13" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    124D
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            <b>
+            124D,
+            </b>
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-14"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  61.6915422886%;
+              width: 0.4975124378%;"
+      title="I 125 - 125" >
+</span>
+        <div id="residue-popup-14" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    125I
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            <b>
+            125I,
+            </b>
+            126P,
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-15"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  62.1890547264%;
+              width: 0.4975124378%;"
+      title="P 126 - 126" >
+</span>
+        <div id="residue-popup-15" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    126P
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            <b>
+            126P,
+            </b>
+            127S,
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-16"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  62.6865671642%;
+              width: 0.4975124378%;"
+      title="S 127 - 127" >
+</span>
+        <div id="residue-popup-16" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    127S
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            <b>
+            127S,
+            </b>
+            128Y,
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-17"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  63.184079602%;
+              width: 0.4975124378%;"
+      title="Y 128 - 128" >
+</span>
+        <div id="residue-popup-17" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    128Y
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            <b>
+            128Y,
+            </b>
+            129R,
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-18"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  63.6815920398%;
+              width: 0.4975124378%;"
+      title="R 129 - 129" >
+</span>
+        <div id="residue-popup-18" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    129R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            <b>
+            129R,
+            </b>
+            131K
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-19"
+      class="match             cdd
+ c5 Domain
+"
+      style="left:  64.6766169154%;
+              width: 0.4975124378%;"
+      title="K 131 - 131" >
+</span>
+        <div id="residue-popup-19" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ c5 Domain
+ caption_puce"></span>
+    131K
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>RNA binding surface</b>
+            <br/>
+            90R,
+            102S,
+            103T,
+            105P,
+            106Q,
+            108R,
+            109Q,
+            112N,
+            113H,
+            115H,
+            122I,
+            123V,
+            124D,
+            125I,
+            126P,
+            127S,
+            128Y,
+            129R,
+            <b>
+            131K
+            </b>
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd00165' class="ext">cd00165 </a>
+        <span>(S4)</span>
+        </div>
+    </div>
+
+
+
+                                    <span class="grade" style="left:0%;" title="0"></span>
+                                    <span class="grade" style="left:9.95%;" title="20"></span>
+                                    <span class="grade" style="left:19.9%;" title="40"></span>
+                                    <span class="grade" style="left:29.851%;" title="60"></span>
+                                    <span class="grade" style="left:39.801%;" title="80"></span>
+                                    <span class="grade" style="left:49.751%;" title="100"></span>
+                                    <span class="grade" style="left:59.701%;" title="120"></span>
+                                    <span class="grade" style="left:69.652%;" title="140"></span>
+                                    <span class="grade" style="left:79.602%;" title="160"></span>
+                                    <span class="grade" style="left:89.552%;" title="180"></span>
+                                    <span class="grade" style="left:100%;" title="201"></span>
+
+                            </div>
+                            </div>
+                            </li>
+                    </ol>
+                    <div class="bot-row-line-bot"></div>
+                </div>
+
+            </div>
+            </div>
+
+
+
+<h3>GO term prediction</h3>
+
+<div class="prot_go">
+
+    <div class="go_terms">
+        <h4>Biological Process</h4>
+        <div class="go_terms_box">
+
+            <p>
+            <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0006412"
+                   class="ext">GO:0006412</a> translation
+                <br/>
+            </p>
+        </div>
+
+        <h4>Molecular Function</h4>
+        <div class="go_terms_box">
+
+        <p>
+              <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0003723"
+                   class="ext">GO:0003723</a> RNA binding
+                <br/>
+            
+              <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0003735"
+                   class="ext">GO:0003735</a> structural constituent of ribosome
+                <br/>
+            
+              <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0019843"
+                   class="ext">GO:0019843</a> rRNA binding
+                <br/>
+            </p>
+        </div>
+
+        <h4>Cellular Component</h4>
+        <div class="go_terms_box">
+
+        <p>
+                <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0005622"
+                   class="ext">GO:0005622</a> intracellular
+                <br/>
+            
+                <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0015935"
+                   class="ext">GO:0015935</a> small ribosomal subunit
+                <br/>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+            // Use hidden DIVs to display popups
+            $('span[id*="span-"]').each(
+                    function(i) {
+                            preparePopup(this.id, 2);
+                    }
+            );
+    });
+</script>
+
+        </div>
+    </div>
+
+
+</div>
+
+    <div class="grid_19 omega main-content"><i>Generated with InterProScan 5.32-71.0</i></div>
+</div>
+</body>
+</html>

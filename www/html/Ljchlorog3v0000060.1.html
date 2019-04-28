@@ -1,0 +1,5203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" content="text/html">
+    <title>
+    Ljchlorog3v0000060.1 - InterPro
+    </title>
+    <meta name="description" content="InterProScan result page: Protein matches and sequence features">
+    <meta name="author" content="InterPro Team, European Bioinformatics Institute">
+
+
+    <link href="resources/css/type_colours.css" rel="stylesheet" type="text/css"/>
+    <link class="database" href="resources/css/database.css" rel="stylesheet" type="text/css"/>
+    <link href="resources/javascript/qtip2/jquery.qtip.css" rel="stylesheet" type="text/css"/>
+    <link href="resources/css/protein.css" rel="stylesheet" type="text/css"/>
+    <script src="resources/javascript/jquery/jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="resources/javascript/jquery/jquery-ui-1.8.17.custom.min.js" type="text/javascript"></script>
+    <script src="resources/javascript/qtip2/jquery.qtip.min.js" type="text/javascript"></script>
+    <script src="resources/javascript/common.js" type="text/javascript"></script>
+    <script src="resources/javascript/protein.js" type="text/javascript"></script>
+    <script src="resources/javascript/protein-popups.js" type="text/javascript"></script>
+    <script src="resources/javascript/jquery/jquery.cookie.js" type="text/javascript"></script>
+    <script src="resources/javascript/jquery/jquery.jscroll.min.js" type="text/javascript"></script>
+
+</head>
+<body>
+<div class="container_24">
+<div class="grid_24 clearfix" id="content" >
+
+    <div class="grid_5 alpha">
+<div id="menu" style="display: none;">
+    <div class="menu-filter">
+
+        <h1>Filter view on</h1>
+
+        <div class="menu-filter-type"><h1>Entry type</h1>
+
+            <fieldset>
+                <div >
+                    <input type="checkbox" class="type" id="check-1" value="Homologous_superfamily-row"
+                           checked="checked" />
+                    <label for="check-1" class="homologous-superfamily">Homologous superfamily</label>
+                </div>
+                <div >
+                    <input type="checkbox" class="type" id="check-2" value="Family-row"
+                           checked="checked" />
+                    <label for="check-2" class="family">Family</label>
+                </div>
+                <div >
+                    <input type="checkbox" class="type" id="check-3" value="Domain-row"
+                           checked="checked" />
+                    <label for="check-3" class="domains">Domains</label>
+                </div>
+                <div class="disabled">
+                    <input type="checkbox" class="type" id="check-4" value="Repeat-row"
+                           checked="checked" disabled="disabled"/>
+                    <label for="check-4" class="repeats">Repeats</label>
+                </div>
+                <div >
+                    <input type="checkbox" class="type" id="check-5"
+                           value="SITE-row Conserved_site-row PTM-row Binding_site-row Active_site-row"
+                           checked="checked" />
+                    <label for="check-5" class="site">Site</label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="menu-filter-status"><h1>Status</h1>
+
+            <fieldset>
+                <div >
+                    <input type="checkbox" name="type" id="check-6" value="unintegrated"
+                           checked="checked" />
+                    <label for="check-6" class="uni">Unintegrated</label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="menu-filter-sites"><h1>Per-residue features</h1>
+
+            <fieldset>
+                <div >
+                    <input type="checkbox" name="sites" id="check-7" value="Sites"
+                           checked="checked" />
+                    <label for="check-7">Residue annotation</label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="menu-filter-colour">
+            <div class="filter-colour-head">
+                <div class="filter-colour-title-l">
+                    Colour by
+                </div>
+
+            </div>
+            <fieldset>
+                <input type="radio" name="blobColour" id="domainColour" value="domainColour" checked="checked"/>
+                <label for="domainColour">domain relationship</label> <br/>
+
+                <input type="radio" name="blobColour" id="databaseColour" value="databaseColour"/>
+                <label for="databaseColour">source database</label>
+            </fieldset>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+// Read colour preference from cookie (requires http://plugins.jquery.com/project/Cookie)
+
+            // Retrieve existing cookies and set checkbox states accordingly
+            var checkBoxIDs = ["#check-1", "#check-2", "#check-3", "#check-4", "#check-5", "#check-6", "#check-7"];
+            for (i = 0; i < checkBoxIDs.length; i++) {
+                var checkBoxId = checkBoxIDs[i];
+                var cookieVal = $.cookie(checkBoxId);
+                if (cookieVal != null) {
+                    $(checkBoxId).prop("checked", cookieVal == "true");
+                }
+            }
+
+            // and the radio button group
+            var radioCookieVal = $.cookie("colour-by-domain");
+            if (radioCookieVal != null) {
+                if (radioCookieVal == "true") {
+                    $('#domainColour').prop("checked", true);
+                }
+                else {
+                    $('#databaseColour').prop("checked", true);
+                }
+            }
+
+            // Keep the filter menu in view
+//            $("#menu").jScroll();
+            // CSS switching
+            configureStylesheets($('input[name="blobColour"]:checked').attr('id') == 'domainColour'); // initialise
+
+            $('input[name="blobColour"]').change(function() {
+                configureStylesheets($('input[name="blobColour"]:checked').attr('id') == 'domainColour');
+            });
+
+            // Change event for type checkboxes (Family, Domain etc.)
+            $(".type").change(function() {
+                displayType(this);
+            });
+
+            // Initialise types
+            $(".type").each(function() {
+                displayType(this);
+            });
+
+            // Change event for un-integrated sig matches checkbox
+            $("#check-6").change(function() {
+                displayUnintegrated(this);
+            });
+
+            // Initialise un-integrated.
+            // TODO Work out how to do this without each! Only one thing with an ID of "check-6"!
+            $("#check-6").each(function() {
+                displayUnintegrated(this);
+            });
+
+        // Change event for sites checkbox
+        $("#check-7").change(function() {
+            displaySites(this);
+        });
+
+        // Initialise sites.
+        // TODO Work out how to do this without each! Only one thing with an ID of "check-7"!
+        $("#check-7").each(function() {
+            displaySites(this);
+        });
+
+        // Make the menu visible - Javascript is enabled.
+        $("#menu").css('display', 'block');
+    });
+</script>
+    </div>
+
+    <div class="grid_19 omega main-content">
+        <div class="tab">
+            <div class="Protein_tab">Protein</div>
+        </div>
+
+        <div class="main-box">
+                <h2 class="strapline">Ljchlorog3v0000060.1 </h2>
+<div class="prot_gal">
+
+
+    <div class="prot_gal_bloc">
+        <div class="prot_gal_col"><b>Length</b></div>
+        <div class="prot_gal_desc">459 amino acids
+        </div>
+    </div>
+
+    <br/>
+    <hr/>
+</div>
+
+
+
+
+          <h3>Protein family membership</h3>
+          <div class="Family rel_tree"><ul><li><a href="http://www.ebi.ac.uk/interpro/entry/IPR005722">ATP synthase, F1 complex, beta subunit</a><span> (IPR005722)</span></li></ul></div>
+
+
+
+    <h3>Homologous superfamilies</h3>
+
+
+    <div class="prot_sum">
+    <div class="bot-row">
+        <div class="bot-row-line-top"></div>
+        <ol class="signatures">
+
+
+
+    <li class="signature entry-signatures">
+        <div class="bot-row-signame">Homologous superfamily</div>
+        <div class="bot-row-line">
+            <div class="matches">
+
+
+<span id="supermatch-span-h-1"
+      class="match Homologous_superfamily"
+      style="left:  0%;
+              width: 12.4183006536%;"
+      title="Homologous_superfamily 1 - 57" >
+</span>
+        <div id="supermatch-popup-h-1" style="display: none;">
+        <div class="popup_topl">
+            <span class="Homologous_superfamily caption_puce"></span>1 - 57
+        </div>
+        <div class="rel_tree"><ul><li class="Homologous_superfamily" ><a href="http://www.ebi.ac.uk/interpro/entry/IPR036121">ATPase, F1/V1/A1 complex, alpha/beta subunit, N-terminal domain superfamily</a><span> (IPR036121)</span></li></ul></div>
+    </div>
+
+
+
+
+<span id="supermatch-span-h-2"
+      class="match Homologous_superfamily"
+      style="left:  12.8540305011%;
+              width: 60.7843137255%;"
+      title="Homologous_superfamily 60 - 338" >
+</span>
+        <div id="supermatch-popup-h-2" style="display: none;">
+        <div class="popup_topl">
+            <span class="Homologous_superfamily caption_puce"></span>60 - 338
+        </div>
+        <div class="rel_tree"><ul><li class="Homologous_superfamily" ><a href="http://www.ebi.ac.uk/interpro/entry/IPR027417">P-loop containing nucleoside triphosphate hydrolase</a><span> (IPR027417)</span></li></ul></div>
+    </div>
+
+
+
+                    <span class="grade" style="left:0%;" title="0"></span>
+                    <span class="grade" style="left:10.8932461874%;" title="50"></span>
+                    <span class="grade" style="left:21.7864923747%;" title="100"></span>
+                    <span class="grade" style="left:32.6797385621%;" title="150"></span>
+                    <span class="grade" style="left:43.5729847495%;" title="200"></span>
+                    <span class="grade" style="left:54.4662309368%;" title="250"></span>
+                    <span class="grade" style="left:65.3594771242%;" title="300"></span>
+                    <span class="grade" style="left:76.2527233115%;" title="350"></span>
+                    <span class="grade" style="left:87.1459694989%;" title="400"></span>
+                    <span class="grade" style="left:100%;" title="459"></span>
+
+            </div>
+        </div>
+    </li>
+
+        </ol>
+        <div class="bot-row-line-bot"></div>
+    </div>
+
+    <div class="prot_scale">
+        <div class="bot-row">
+
+            <div class="bot-row-line">
+                <div style="position:relative;">
+                            <span class="scale_bar" style="left:0%;"
+                                  title="1"></span>
+                                <span class="scale_numb"
+                                      style="left:1%;">1</span>
+                            <span class="scale_bar" style="left:10.8932461874%;"
+                                  title="50"></span>
+                                <span class="scale_numb"
+                                      style="left:10.8932461874%;">50</span>
+                            <span class="scale_bar" style="left:21.7864923747%;"
+                                  title="100"></span>
+                                <span class="scale_numb"
+                                      style="left:21.7864923747%;">100</span>
+                            <span class="scale_bar" style="left:32.6797385621%;"
+                                  title="150"></span>
+                                <span class="scale_numb"
+                                      style="left:32.6797385621%;">150</span>
+                            <span class="scale_bar" style="left:43.5729847495%;"
+                                  title="200"></span>
+                                <span class="scale_numb"
+                                      style="left:43.5729847495%;">200</span>
+                            <span class="scale_bar" style="left:54.4662309368%;"
+                                  title="250"></span>
+                                <span class="scale_numb"
+                                      style="left:54.4662309368%;">250</span>
+                            <span class="scale_bar" style="left:65.3594771242%;"
+                                  title="300"></span>
+                                <span class="scale_numb"
+                                      style="left:65.3594771242%;">300</span>
+                            <span class="scale_bar" style="left:76.2527233115%;"
+                                  title="350"></span>
+                                <span class="scale_numb"
+                                      style="left:76.2527233115%;">350</span>
+                            <span class="scale_bar" style="left:87.1459694989%;"
+                                  title="400"></span>
+                                <span class="scale_numb"
+                                      style="left:87.1459694989%;">400</span>
+                            <span class="scale_bar" style="left:100%;"
+                                  title="459"></span>
+                                <span class="scale_numb"
+                                      style="left:100%;">459</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    </div>
+
+
+
+    <h3>Domains and repeats</h3>
+
+
+    <div class="prot_sum">
+    <div class="bot-row">
+        <div class="bot-row-line-top"></div>
+        <ol class="signatures">
+
+
+
+    <li class="signature entry-signatures">
+        <div class="bot-row-signame">Domain</div>
+        <div class="bot-row-line">
+            <div class="matches">
+
+
+<span id="supermatch-span-dr-1"
+      class="match c6 Domain"
+      style="left:  0%;
+              width: 12.2004357298%;"
+      title="Domain 1 - 56" >
+</span>
+        <div id="supermatch-popup-dr-1" style="display: none;">
+        <div class="popup_topl">
+            <span class="c6 Domain caption_puce"></span>1 - 56
+        </div>
+        <div class="rel_tree"><ul><li class="Domain" ><a href="http://www.ebi.ac.uk/interpro/entry/IPR004100">ATPase, F1/V1/A1 complex, alpha/beta subunit, N-terminal domain</a><span> (IPR004100)</span></li></ul></div>
+    </div>
+
+
+
+
+<span id="supermatch-span-dr-2"
+      class="match c38 Domain"
+      style="left:  24.4008714597%;
+              width: 48.1481481481%;"
+      title="Domain 113 - 333" >
+</span>
+        <div id="supermatch-popup-dr-2" style="display: none;">
+        <div class="popup_topl">
+            <span class="c38 Domain caption_puce"></span>113 - 333
+        </div>
+        <div class="rel_tree"><ul><li class="Domain" ><a href="http://www.ebi.ac.uk/interpro/entry/IPR000194">ATPase, F1/V1/A1 complex, alpha/beta subunit, nucleotide-binding domain</a><span> (IPR000194)</span></li></ul></div>
+    </div>
+
+
+
+                    <span class="grade" style="left:0%;" title="0"></span>
+                    <span class="grade" style="left:10.8932461874%;" title="50"></span>
+                    <span class="grade" style="left:21.7864923747%;" title="100"></span>
+                    <span class="grade" style="left:32.6797385621%;" title="150"></span>
+                    <span class="grade" style="left:43.5729847495%;" title="200"></span>
+                    <span class="grade" style="left:54.4662309368%;" title="250"></span>
+                    <span class="grade" style="left:65.3594771242%;" title="300"></span>
+                    <span class="grade" style="left:76.2527233115%;" title="350"></span>
+                    <span class="grade" style="left:87.1459694989%;" title="400"></span>
+                    <span class="grade" style="left:100%;" title="459"></span>
+
+            </div>
+        </div>
+    </li>
+    <li class="signature entry-signatures">
+        <div class="bot-row-signame">Domain</div>
+        <div class="bot-row-line">
+            <div class="matches">
+
+
+<span id="supermatch-span-dr-3"
+      class="match c4 Domain"
+      style="left:  27.0152505447%;
+              width: 42.0479302832%;"
+      title="Domain 125 - 317" >
+</span>
+        <div id="supermatch-popup-dr-3" style="display: none;">
+        <div class="popup_topl">
+            <span class="c4 Domain caption_puce"></span>125 - 317
+        </div>
+        <div class="rel_tree"><ul><li class="Domain" ><a href="http://www.ebi.ac.uk/interpro/entry/IPR003593">AAA+ ATPase domain</a><span> (IPR003593)</span></li></ul></div>
+    </div>
+
+
+
+                    <span class="grade" style="left:0%;" title="0"></span>
+                    <span class="grade" style="left:10.8932461874%;" title="50"></span>
+                    <span class="grade" style="left:21.7864923747%;" title="100"></span>
+                    <span class="grade" style="left:32.6797385621%;" title="150"></span>
+                    <span class="grade" style="left:43.5729847495%;" title="200"></span>
+                    <span class="grade" style="left:54.4662309368%;" title="250"></span>
+                    <span class="grade" style="left:65.3594771242%;" title="300"></span>
+                    <span class="grade" style="left:76.2527233115%;" title="350"></span>
+                    <span class="grade" style="left:87.1459694989%;" title="400"></span>
+                    <span class="grade" style="left:100%;" title="459"></span>
+
+            </div>
+        </div>
+    </li>
+
+        </ol>
+        <div class="bot-row-line-bot"></div>
+    </div>
+
+    <div class="prot_scale">
+        <div class="bot-row">
+
+            <div class="bot-row-line">
+                <div style="position:relative;">
+                            <span class="scale_bar" style="left:0%;"
+                                  title="1"></span>
+                                <span class="scale_numb"
+                                      style="left:1%;">1</span>
+                            <span class="scale_bar" style="left:10.8932461874%;"
+                                  title="50"></span>
+                                <span class="scale_numb"
+                                      style="left:10.8932461874%;">50</span>
+                            <span class="scale_bar" style="left:21.7864923747%;"
+                                  title="100"></span>
+                                <span class="scale_numb"
+                                      style="left:21.7864923747%;">100</span>
+                            <span class="scale_bar" style="left:32.6797385621%;"
+                                  title="150"></span>
+                                <span class="scale_numb"
+                                      style="left:32.6797385621%;">150</span>
+                            <span class="scale_bar" style="left:43.5729847495%;"
+                                  title="200"></span>
+                                <span class="scale_numb"
+                                      style="left:43.5729847495%;">200</span>
+                            <span class="scale_bar" style="left:54.4662309368%;"
+                                  title="250"></span>
+                                <span class="scale_numb"
+                                      style="left:54.4662309368%;">250</span>
+                            <span class="scale_bar" style="left:65.3594771242%;"
+                                  title="300"></span>
+                                <span class="scale_numb"
+                                      style="left:65.3594771242%;">300</span>
+                            <span class="scale_bar" style="left:76.2527233115%;"
+                                  title="350"></span>
+                                <span class="scale_numb"
+                                      style="left:76.2527233115%;">350</span>
+                            <span class="scale_bar" style="left:87.1459694989%;"
+                                  title="400"></span>
+                                <span class="scale_numb"
+                                      style="left:87.1459694989%;">400</span>
+                            <span class="scale_bar" style="left:100%;"
+                                  title="459"></span>
+                                <span class="scale_numb"
+                                      style="left:100%;">459</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    </div>
+
+
+
+    <h3>Detailed signature matches</h3>
+
+
+        <div class="prot_entries">
+            <ol class="entries">
+                    <li class="entry Homologous_superfamily-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_homologous_superfamily_small.png"
+                                                         alt="Homologous superfamily" title="Homologous superfamily"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR036121">IPR036121</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR036121"
+                                                         class="neutral">ATPase, F1/V1/A1 complex, alpha/beta subunit, N-terminal domain superfamily</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR036121-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF50615" title="SSF50615 (N-terminal domain of alpha and beta subunits of F1 ATP synthase)" class="neutral">
+SSF50615
+</a>
+
+        <span>(N-termina...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="SSF50615-span-1"
+      class="match superfamily Homologous_superfamily"
+      style="left:  0%;
+              width: 12.4183006536%;"
+      title="SSF50615 1 - 57" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="SSF50615-popup-1" style="display: none;">
+
+    <div class="popup_topl"><span class="superfamily Homologous_superfamily caption_puce"></span>1 - 57</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>SUPERFAMILY</b> <abbr class="icon icon-generic" data-icon="i" title="SUPERFAMILY is a library of profile hidden Markov models that represent all proteins of known structure. The library is based on the SCOP classification of proteins. Models correspond to SCOP domains at the superfamily level and a hybrid method subsequently sub-classifies domains at the family level. SUPERFAMILY provides its structural assignments at both levels to all completely sequenced genomes."></abbr> <br/>
+
+        <a href='http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF50615' class="ext">SSF50615 </a>
+        <span>(N-terminal domain of alpha and beta subunits of F1 ATP synthase)</span>
+            <br/>
+            Model: 0037820
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry Homologous_superfamily-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_homologous_superfamily_small.png"
+                                                         alt="Homologous superfamily" title="Homologous superfamily"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR027417">IPR027417</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR027417"
+                                                         class="neutral">P-loop containing nucleoside triphosphate hydrolase</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR027417-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF52540" title="SSF52540 (P-loop containing nucleoside triphosphate hydrolases)" class="neutral">
+SSF52540
+</a>
+
+        <span>(P-loop co...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="SSF52540-span-2"
+      class="match superfamily Homologous_superfamily"
+      style="left:  12.8540305011%;
+              width: 60.7843137255%;"
+      title="SSF52540 60 - 338" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="SSF52540-popup-2" style="display: none;">
+
+    <div class="popup_topl"><span class="superfamily Homologous_superfamily caption_puce"></span>60 - 338</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>SUPERFAMILY</b> <abbr class="icon icon-generic" data-icon="i" title="SUPERFAMILY is a library of profile hidden Markov models that represent all proteins of known structure. The library is based on the SCOP classification of proteins. Models correspond to SCOP domains at the superfamily level and a hybrid method subsequently sub-classifies domains at the family level. SUPERFAMILY provides its structural assignments at both levels to all completely sequenced genomes."></abbr> <br/>
+
+        <a href='http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF52540' class="ext">SSF52540 </a>
+        <span>(P-loop containing nucleoside triphosphate hydrolases)</span>
+            <br/>
+            Model: 0046478
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry Family-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_family_small.png"
+                                                         alt="Family" title="Family"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR005722">IPR005722</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR005722"
+                                                         class="neutral">ATP synthase, F1 complex, beta subunit</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR005722-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+<a href="http://www.jcvi.org/cgi-bin/tigrfams/HmmReportPage.cgi?acc=TIGR01039" title="TIGR01039" class="neutral">
+TIGR01039
+</a>
+
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="TIGR01039-span-3"
+      class="match tigrfams Family"
+      style="left:  0%;
+              width: 98.25708061%;"
+      title="TIGR01039 1 - 451" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="TIGR01039-popup-3" style="display: none;">
+
+    <div class="popup_topl"><span class="tigrfams Family caption_puce"></span>1 - 451</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>TIGRFAMs</b> <abbr class="icon icon-generic" data-icon="i" title="TIGRFAMs is a collection of protein families."></abbr> <br/>
+
+        <a href='http://www.jcvi.org/cgi-bin/tigrfams/HmmReportPage.cgi?acc=TIGR01039' class="ext">TIGR01039 </a>
+        <span>(TIGR01039)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+
+                                    <li id="IPR005722-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://hamap.expasy.org/profile/MF_01347" title="MF_01347 (ATP_synth_beta_bact)" class="neutral">
+MF_01347
+</a>
+
+        <span>(ATP_synth...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="MF_01347-span-4"
+      class="match hamap Family"
+      style="left:  0%;
+              width: 98.25708061%;"
+      title="MF_01347 1 - 451" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="MF_01347-popup-4" style="display: none;">
+
+    <div class="popup_topl"><span class="hamap Family caption_puce"></span>1 - 451</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>HAMAP</b> <abbr class="icon icon-generic" data-icon="i" title="HAMAP stands for High-quality Automated and Manual Annotation of Proteins. HAMAP profiles are manually created by expert curators. They identify proteins that are part of well-conserved proteins families or subfamilies. HAMAP is based at the SIB Swiss Institute of Bioinformatics, Geneva, Switzerland."></abbr> <br/>
+
+        <a href='http://hamap.expasy.org/profile/MF_01347' class="ext">MF_01347 </a>
+        <span>(ATP_synth_beta_bact)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry Domain-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_domain_small.png"
+                                                         alt="Domain" title="Domain"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR004100">IPR004100</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR004100"
+                                                         class="neutral">ATPase, F1/V1/A1 complex, alpha/beta subunit, N-terminal domain</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR004100-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://pfam.xfam.org/family/PF02874" title="PF02874 (ATP-synt_ab_N)" class="neutral">
+PF02874
+</a>
+
+        <span>(ATP-synt_ab_N)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="PF02874-span-5"
+      class="match pfam c6 Domain"
+      style="left:  0%;
+              width: 12.2004357298%;"
+      title="PF02874 1 - 56" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="PF02874-popup-5" style="display: none;">
+
+    <div class="popup_topl"><span class="pfam c6 Domain caption_puce"></span>1 - 56</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>Pfam</b> <abbr class="icon icon-generic" data-icon="i" title="Pfam is a collection of protein family alignments which were constructed semi-automatically using hidden Markov models (HMMs). Sequences that were not covered by Pfam were clustered and aligned automatically, and are released as Pfam-B. Pfam families have permanent accession numbers and contain functional annotation and cross-references to other databases, while Pfam-B families are re-generated at each release and are unannotated."></abbr> <br/>
+
+        <a href='http://pfam.xfam.org/family/PF02874' class="ext">PF02874 </a>
+        <span>(ATP-synt_ab_N)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry Domain-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_domain_small.png"
+                                                         alt="Domain" title="Domain"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR000194">IPR000194</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR000194"
+                                                         class="neutral">ATPase, F1/V1/A1 complex, alpha/beta subunit, nucleotide-binding domain</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR000194-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://pfam.xfam.org/family/PF00006" title="PF00006 (ATP-synt_ab)" class="neutral">
+PF00006
+</a>
+
+        <span>(ATP-synt_ab)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="PF00006-span-6"
+      class="match pfam c38 Domain"
+      style="left:  24.4008714597%;
+              width: 48.1481481481%;"
+      title="PF00006 113 - 333" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="PF00006-popup-6" style="display: none;">
+
+    <div class="popup_topl"><span class="pfam c38 Domain caption_puce"></span>113 - 333</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>Pfam</b> <abbr class="icon icon-generic" data-icon="i" title="Pfam is a collection of protein family alignments which were constructed semi-automatically using hidden Markov models (HMMs). Sequences that were not covered by Pfam were clustered and aligned automatically, and are released as Pfam-B. Pfam families have permanent accession numbers and contain functional annotation and cross-references to other databases, while Pfam-B families are re-generated at each release and are unannotated."></abbr> <br/>
+
+        <a href='http://pfam.xfam.org/family/PF00006' class="ext">PF00006 </a>
+        <span>(ATP-synt_ab)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry Domain-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_domain_small.png"
+                                                         alt="Domain" title="Domain"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR003593">IPR003593</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR003593"
+                                                         class="neutral">AAA+ ATPase domain</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR003593-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://smart.embl-heidelberg.de/smart/do_annotation.pl?ACC=SM00382&amp;BLAST=DUMMY" title="SM00382 (AAA_5)" class="neutral">
+SM00382
+</a>
+
+        <span>(AAA_5)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="SM00382-span-7"
+      class="match smart c4 Domain"
+      style="left:  27.0152505447%;
+              width: 42.0479302832%;"
+      title="SM00382 125 - 317" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="SM00382-popup-7" style="display: none;">
+
+    <div class="popup_topl"><span class="smart c4 Domain caption_puce"></span>125 - 317</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>SMART</b> <abbr class="icon icon-generic" data-icon="i" title="SMART (a Simple Modular Architecture Research Tool) uses hidden Markov models (HMMs) and allows the identification of genetically mobile domains and the analysis of domain architectures. These domains are extensively annotated with respect to phyletic distributions, functional class, tertiary structures and functionally important residues."></abbr> <br/>
+
+        <a href='http://smart.embl-heidelberg.de/smart/do_annotation.pl?ACC=SM00382&amp;BLAST=DUMMY' class="ext">SM00382 </a>
+        <span>(AAA_5)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+                    <li class="entry SITE-row">
+
+                        <div class="top-row">
+                            <div class="top-row-id"><img src="resources/images/ico_type_site_small.png"
+                                                         alt="SITE" title="SITE"/> <a
+                                    href="http://www.ebi.ac.uk/interpro/entry/IPR020003">IPR020003</a></div>
+                            <div class="top-row-name"><a href="http://www.ebi.ac.uk/interpro/entry/IPR020003"
+                                                         class="neutral">ATPase, alpha/beta subunit, nucleotide-binding domain, active site</a></div>
+                        </div>
+
+                        <div class="bot-row">
+                            <div class="bot-row-line-top"></div>
+                            <ol class="signatures" style="border:0px solid pink;">
+
+
+                                    <li id="IPR020003-signatures" class="signature entry-signatures">
+<div class="bot-row-signame">
+
+            <a href="http://www.expasy.org/prosite/PS00152" title="PS00152 (ATPASE_ALPHA_BETA)" class="neutral">
+PS00152
+</a>
+
+        <span>(ATPASE_ALP...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="PS00152-span-8"
+      class="match prosite-patterns SITE"
+      style="left:  70.3703703704%;
+              width: 2.1786492375%;"
+      title="PS00152 324 - 333" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="PS00152-popup-8" style="display: none;">
+
+    <div class="popup_topl"><span class="prosite-patterns SITE caption_puce"></span>324 - 333</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>PROSITE patterns</b> <abbr class="icon icon-generic" data-icon="i" title="PROSITE consists of documentation entries describing protein domains, families and functional sites, as well as associated patterns and profiles to identify them. Profiles and patterns are constructed from manually edited seed alignments. PROSITE is complemented by ProRule, a collection of rules based on profiles and patterns, which increases the discriminatory power of profiles and patterns by providing additional information about functionally and/or structurally critical amino acids."></abbr> <br/>
+
+        <a href='http://www.expasy.org/prosite/PS00152' class="ext">PS00152 </a>
+        <span>(ATPASE_ALPHA_BETA)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                                    </li>
+                            </ol>
+                            <div class="bot-row-line-bot"></div>
+                        </div>
+                    </li>
+            </ol>
+        </div>
+
+
+            <div class="prot_entries" id="uni_sign">
+                <div class="top-row">
+                    <div class="top-row-id"><img src="resources/images/ico_type_uni_small.png"
+                                                 alt="Unintegrated signatures" title="Unintegrated signatures"/> no IPR
+                    </div>
+                    <div class="top-row-name">Unintegrated signatures</div>
+                </div>
+                <div class="bot-row">
+                    <div class="bot-row-line-top"></div>
+                    <ol class="signatures">
+                            <li class="signature">
+<div class="bot-row-signame">
+
+            <a href="http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF47917" title="SSF47917 (C-terminal domain of alpha and beta subunits of F1 ATP synthase)" class="neutral">
+SSF47917
+</a>
+
+        <span>(C-termina...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="SSF47917-span-9"
+      class="match superfamily uni"
+      style="left:  72.9847494553%;
+              width: 25.2723311547%;"
+      title="SSF47917 336 - 451" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="SSF47917-popup-9" style="display: none;">
+
+    <div class="popup_topl"><span class="superfamily uni caption_puce"></span>336 - 451</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>SUPERFAMILY</b> <abbr class="icon icon-generic" data-icon="i" title="SUPERFAMILY is a library of profile hidden Markov models that represent all proteins of known structure. The library is based on the SCOP classification of proteins. Models correspond to SCOP domains at the superfamily level and a hybrid method subsequently sub-classifies domains at the family level. SUPERFAMILY provides its structural assignments at both levels to all completely sequenced genomes."></abbr> <br/>
+
+        <a href='http://supfam.org/SUPERFAMILY/cgi-bin/scop.cgi?ipid=SSF47917' class="ext">SSF47917 </a>
+        <span>(C-terminal domain of alpha and beta subunits of F1 ATP synthase)</span>
+            <br/>
+            Model: 0036814
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                            </li>
+                            <li class="signature">
+<div class="bot-row-signame">
+
+            <a href="http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133" title="cd01133 (F1-ATPase_beta)" class="neutral">
+cd01133
+</a>
+
+        <span>(F1-ATPase_...)</span>
+
+</div>
+<div class="bot-row-line">
+    <div class="matches">
+
+
+
+<span id="cd01133-span-10"
+      class="match cdd uni"
+      style="left:  12.6361655773%;
+              width: 61.0021786492%;"
+      title="cd01133 59 - 338" >
+</span>
+
+<script type="text/javascript">
+
+</script>
+
+    <div id="cd01133-popup-10" style="display: none;">
+
+    <div class="popup_topl"><span class="cdd uni caption_puce"></span>59 - 338</div>
+    <div class="popup_botl" style="font-size:88%;">
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+    </div>
+</div>
+
+            <span class="grade" style="left:0%;" title="0"></span>
+            <span class="grade" style="left:10.8932461874%;" title="50"></span>
+            <span class="grade" style="left:21.7864923747%;" title="100"></span>
+            <span class="grade" style="left:32.6797385621%;" title="150"></span>
+            <span class="grade" style="left:43.5729847495%;" title="200"></span>
+            <span class="grade" style="left:54.4662309368%;" title="250"></span>
+            <span class="grade" style="left:65.3594771242%;" title="300"></span>
+            <span class="grade" style="left:76.2527233115%;" title="350"></span>
+            <span class="grade" style="left:87.1459694989%;" title="400"></span>
+            <span class="grade" style="left:100%;" title="459"></span>
+
+    </div>
+
+</div>
+                            </li>
+                    </ol>
+                    <div class="bot-row-line-bot"></div>
+                </div>
+            </div>
+
+
+            <div id="sites">
+            <h3>Residue annotation</h3>
+            <div class="prot_sum">
+                <div class="bot-row">
+                    <div class="bot-row-line-top"></div>
+                    <ol class="signatures">
+                            <li class="signature">
+                                <div class="bot-row-signame">
+                                            <span title="alpha subunit interaction interface cd01133">alpha subunit inte...</span>
+                                </div>
+                                <div class="bot-row-line">
+                            <div class="matches">
+
+
+
+
+<span id="residue-span-1"
+      class="match             cdd
+ uni
+"
+      style="left:  17.4291938998%;
+              width: 0.2178649237%;"
+      title="N 81 - 81" >
+</span>
+        <div id="residue-popup-1" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    81N
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            <b>
+            81N,
+            </b>
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-2"
+      class="match             cdd
+ uni
+"
+      style="left:  21.1328976035%;
+              width: 0.2178649237%;"
+      title="P 98 - 98" >
+</span>
+        <div id="residue-popup-2" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    98P
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            <b>
+            98P,
+            </b>
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-3"
+      class="match             cdd
+ uni
+"
+      style="left:  21.568627451%;
+              width: 0.2178649237%;"
+      title="F 100 - 100" >
+</span>
+        <div id="residue-popup-3" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    100F
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            <b>
+            100F,
+            </b>
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-4"
+      class="match             cdd
+ uni
+"
+      style="left:  21.7864923747%;
+              width: 0.2178649237%;"
+      title="I 101 - 101" >
+</span>
+        <div id="residue-popup-4" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    101I
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            <b>
+            101I,
+            </b>
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-5"
+      class="match             cdd
+ uni
+"
+      style="left:  22.2222222222%;
+              width: 0.2178649237%;"
+      title="L 103 - 103" >
+</span>
+        <div id="residue-popup-5" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    103L
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            <b>
+            103L,
+            </b>
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-6"
+      class="match             cdd
+ uni
+"
+      style="left:  22.6579520697%;
+              width: 0.2178649237%;"
+      title="T 105 - 105" >
+</span>
+        <div id="residue-popup-6" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    105T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            <b>
+            105T,
+            </b>
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-7"
+      class="match             cdd
+ uni
+"
+      style="left:  35.9477124183%;
+              width: 0.2178649237%;"
+      title="R 166 - 166" >
+</span>
+        <div id="residue-popup-7" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    166R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            <b>
+            166R,
+            </b>
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-8"
+      class="match             cdd
+ uni
+"
+      style="left:  36.165577342%;
+              width: 0.2178649237%;"
+      title="T 167 - 167" >
+</span>
+        <div id="residue-popup-8" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    167T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            <b>
+            167T,
+            </b>
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-9"
+      class="match             cdd
+ uni
+"
+      style="left:  36.3834422658%;
+              width: 0.2178649237%;"
+      title="R 168 - 168" >
+</span>
+        <div id="residue-popup-9" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    168R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            <b>
+            168R,
+            </b>
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-10"
+      class="match             cdd
+ uni
+"
+      style="left:  37.037037037%;
+              width: 0.2178649237%;"
+      title="N 171 - 171" >
+</span>
+        <div id="residue-popup-10" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    171N
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            <b>
+            171N,
+            </b>
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-11"
+      class="match             cdd
+ uni
+"
+      style="left:  43.3551198257%;
+              width: 0.2178649237%;"
+      title="M 200 - 200" >
+</span>
+        <div id="residue-popup-11" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    200M
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            <b>
+            200M,
+            </b>
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-12"
+      class="match             cdd
+ uni
+"
+      style="left:  43.5729847495%;
+              width: 0.2178649237%;"
+      title="N 201 - 201" >
+</span>
+        <div id="residue-popup-12" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    201N
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            <b>
+            201N,
+            </b>
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-13"
+      class="match             cdd
+ uni
+"
+      style="left:  43.7908496732%;
+              width: 0.2178649237%;"
+      title="E 202 - 202" >
+</span>
+        <div id="residue-popup-13" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    202E
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            <b>
+            202E,
+            </b>
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-14"
+      class="match             cdd
+ uni
+"
+      style="left:  44.8801742919%;
+              width: 0.2178649237%;"
+      title="R 207 - 207" >
+</span>
+        <div id="residue-popup-14" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    207R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            <b>
+            207R,
+            </b>
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-15"
+      class="match             cdd
+ uni
+"
+      style="left:  51.6339869281%;
+              width: 0.2178649237%;"
+      title="R 238 - 238" >
+</span>
+        <div id="residue-popup-15" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    238R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            <b>
+            238R,
+            </b>
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-16"
+      class="match             cdd
+ uni
+"
+      style="left:  52.2875816993%;
+              width: 0.2178649237%;"
+      title="Q 241 - 241" >
+</span>
+        <div id="residue-popup-16" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    241Q
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            <b>
+            241Q,
+            </b>
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-17"
+      class="match             cdd
+ uni
+"
+      style="left:  53.1590413943%;
+              width: 0.2178649237%;"
+      title="E 245 - 245" >
+</span>
+        <div id="residue-popup-17" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    245E
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            <b>
+            245E,
+            </b>
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-18"
+      class="match             cdd
+ uni
+"
+      style="left:  54.4662309368%;
+              width: 0.2178649237%;"
+      title="G 251 - 251" >
+</span>
+        <div id="residue-popup-18" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    251G
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            <b>
+            251G,
+            </b>
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-19"
+      class="match             cdd
+ uni
+"
+      style="left:  54.6840958606%;
+              width: 0.2178649237%;"
+      title="R 252 - 252" >
+</span>
+        <div id="residue-popup-19" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    252R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            <b>
+            252R,
+            </b>
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-20"
+      class="match             cdd
+ uni
+"
+      style="left:  54.9019607843%;
+              width: 0.2178649237%;"
+      title="M 253 - 253" >
+</span>
+        <div id="residue-popup-20" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    253M
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            <b>
+            253M,
+            </b>
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-21"
+      class="match             cdd
+ uni
+"
+      style="left:  55.3376906318%;
+              width: 0.2178649237%;"
+      title="S 255 - 255" >
+</span>
+        <div id="residue-popup-21" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    255S
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            <b>
+            255S,
+            </b>
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-22"
+      class="match             cdd
+ uni
+"
+      style="left:  55.5555555556%;
+              width: 0.2178649237%;"
+      title="A 256 - 256" >
+</span>
+        <div id="residue-popup-22" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    256A
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            <b>
+            256A,
+            </b>
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-23"
+      class="match             cdd
+ uni
+"
+      style="left:  56.6448801743%;
+              width: 0.2178649237%;"
+      title="P 261 - 261" >
+</span>
+        <div id="residue-popup-23" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    261P
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            <b>
+            261P,
+            </b>
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-24"
+      class="match             cdd
+ uni
+"
+      style="left:  57.5163398693%;
+              width: 0.2178649237%;"
+      title="T 265 - 265" >
+</span>
+        <div id="residue-popup-24" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    265T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            <b>
+            265T,
+            </b>
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-25"
+      class="match             cdd
+ uni
+"
+      style="left:  59.0413943355%;
+              width: 0.2178649237%;"
+      title="E 272 - 272" >
+</span>
+        <div id="residue-popup-25" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    272E
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            <b>
+            272E,
+            </b>
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-26"
+      class="match             cdd
+ uni
+"
+      style="left:  62.7450980392%;
+              width: 0.2178649237%;"
+      title="Y 289 - 289" >
+</span>
+        <div id="residue-popup-26" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    289Y
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            <b>
+            289Y,
+            </b>
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-27"
+      class="match             cdd
+ uni
+"
+      style="left:  63.3986928105%;
+              width: 0.2178649237%;"
+      title="A 292 - 292" >
+</span>
+        <div id="residue-popup-27" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    292A
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            <b>
+            292A,
+            </b>
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-28"
+      class="match             cdd
+ uni
+"
+      style="left:  63.6165577342%;
+              width: 0.2178649237%;"
+      title="D 293 - 293" >
+</span>
+        <div id="residue-popup-28" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    293D
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            <b>
+            293D,
+            </b>
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-29"
+      class="match             cdd
+ uni
+"
+      style="left:  64.4880174292%;
+              width: 0.2178649237%;"
+      title="D 297 - 297" >
+</span>
+        <div id="residue-popup-29" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    297D
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            <b>
+            297D,
+            </b>
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-30"
+      class="match             cdd
+ uni
+"
+      style="left:  66.0130718954%;
+              width: 0.2178649237%;"
+      title="F 304 - 304" >
+</span>
+        <div id="residue-popup-30" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    304F
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            <b>
+            304F,
+            </b>
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-31"
+      class="match             cdd
+ uni
+"
+      style="left:  66.4488017429%;
+              width: 0.2178649237%;"
+      title="H 306 - 306" >
+</span>
+        <div id="residue-popup-31" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    306H
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            <b>
+            306H,
+            </b>
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-32"
+      class="match             cdd
+ uni
+"
+      style="left:  66.6666666667%;
+              width: 0.2178649237%;"
+      title="L 307 - 307" >
+</span>
+        <div id="residue-popup-32" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    307L
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            <b>
+            307L,
+            </b>
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-33"
+      class="match             cdd
+ uni
+"
+      style="left:  66.8845315904%;
+              width: 0.2178649237%;"
+      title="D 308 - 308" >
+</span>
+        <div id="residue-popup-33" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    308D
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            <b>
+            308D,
+            </b>
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-34"
+      class="match             cdd
+ uni
+"
+      style="left:  69.2810457516%;
+              width: 0.2178649237%;"
+      title="A 319 - 319" >
+</span>
+        <div id="residue-popup-34" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    319A
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            <b>
+            319A,
+            </b>
+            320K,
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-35"
+      class="match             cdd
+ uni
+"
+      style="left:  69.4989106754%;
+              width: 0.2178649237%;"
+      title="K 320 - 320" >
+</span>
+        <div id="residue-popup-35" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    320K
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            <b>
+            320K,
+            </b>
+            329L,
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-36"
+      class="match             cdd
+ uni
+"
+      style="left:  71.4596949891%;
+              width: 0.2178649237%;"
+      title="L 329 - 329" >
+</span>
+        <div id="residue-popup-36" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    329L
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            <b>
+            329L,
+            </b>
+            330D,
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-37"
+      class="match             cdd
+ uni
+"
+      style="left:  71.6775599129%;
+              width: 0.2178649237%;"
+      title="D 330 - 330" >
+</span>
+        <div id="residue-popup-37" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    330D
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            <b>
+            330D,
+            </b>
+            332T,
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-38"
+      class="match             cdd
+ uni
+"
+      style="left:  72.1132897603%;
+              width: 0.2178649237%;"
+      title="T 332 - 332" >
+</span>
+        <div id="residue-popup-38" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    332T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            <b>
+            332T,
+            </b>
+            334T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-39"
+      class="match             cdd
+ uni
+"
+      style="left:  72.5490196078%;
+              width: 0.2178649237%;"
+      title="T 334 - 334" >
+</span>
+        <div id="residue-popup-39" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    334T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>alpha subunit interaction interface</b>
+            <br/>
+            81N,
+            98P,
+            100F,
+            101I,
+            103L,
+            105T,
+            166R,
+            167T,
+            168R,
+            171N,
+            200M,
+            201N,
+            202E,
+            207R,
+            238R,
+            241Q,
+            245E,
+            251G,
+            252R,
+            253M,
+            255S,
+            256A,
+            261P,
+            265T,
+            272E,
+            289Y,
+            292A,
+            293D,
+            297D,
+            304F,
+            306H,
+            307L,
+            308D,
+            319A,
+            320K,
+            329L,
+            330D,
+            332T,
+            <b>
+            334T
+            </b>
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+                                    <span class="grade" style="left:0%;" title="0"></span>
+                                    <span class="grade" style="left:10.893%;" title="50"></span>
+                                    <span class="grade" style="left:21.786%;" title="100"></span>
+                                    <span class="grade" style="left:32.68%;" title="150"></span>
+                                    <span class="grade" style="left:43.573%;" title="200"></span>
+                                    <span class="grade" style="left:54.466%;" title="250"></span>
+                                    <span class="grade" style="left:65.359%;" title="300"></span>
+                                    <span class="grade" style="left:76.253%;" title="350"></span>
+                                    <span class="grade" style="left:87.146%;" title="400"></span>
+                                    <span class="grade" style="left:100%;" title="459"></span>
+
+                            </div>
+                            </div>
+                            </li>
+                            <li class="signature">
+                                <div class="bot-row-signame">
+                                            <span title="Walker A motif cd01133">Walker A motif cd0...</span>
+                                </div>
+                                <div class="bot-row-line">
+                            <div class="matches">
+
+
+
+
+<span id="residue-span-40"
+      class="match             cdd
+ uni
+"
+      style="left:  28.9760348584%;
+              width: 0.2178649237%;"
+      title="G 134 - 134" >
+</span>
+        <div id="residue-popup-40" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    134G
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker A motif</b>
+            <br/>
+            <b>
+            134G,
+            </b>
+            135A,
+            136G,
+            137V,
+            138G,
+            139K,
+            140T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-41"
+      class="match             cdd
+ uni
+"
+      style="left:  29.1938997821%;
+              width: 0.2178649237%;"
+      title="A 135 - 135" >
+</span>
+        <div id="residue-popup-41" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    135A
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker A motif</b>
+            <br/>
+            134G,
+            <b>
+            135A,
+            </b>
+            136G,
+            137V,
+            138G,
+            139K,
+            140T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-42"
+      class="match             cdd
+ uni
+"
+      style="left:  29.4117647059%;
+              width: 0.2178649237%;"
+      title="G 136 - 136" >
+</span>
+        <div id="residue-popup-42" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    136G
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker A motif</b>
+            <br/>
+            134G,
+            135A,
+            <b>
+            136G,
+            </b>
+            137V,
+            138G,
+            139K,
+            140T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-43"
+      class="match             cdd
+ uni
+"
+      style="left:  29.6296296296%;
+              width: 0.2178649237%;"
+      title="V 137 - 137" >
+</span>
+        <div id="residue-popup-43" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    137V
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker A motif</b>
+            <br/>
+            134G,
+            135A,
+            136G,
+            <b>
+            137V,
+            </b>
+            138G,
+            139K,
+            140T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-44"
+      class="match             cdd
+ uni
+"
+      style="left:  29.8474945534%;
+              width: 0.2178649237%;"
+      title="G 138 - 138" >
+</span>
+        <div id="residue-popup-44" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    138G
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker A motif</b>
+            <br/>
+            134G,
+            135A,
+            136G,
+            137V,
+            <b>
+            138G,
+            </b>
+            139K,
+            140T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-45"
+      class="match             cdd
+ uni
+"
+      style="left:  30.0653594771%;
+              width: 0.2178649237%;"
+      title="K 139 - 139" >
+</span>
+        <div id="residue-popup-45" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    139K
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker A motif</b>
+            <br/>
+            134G,
+            135A,
+            136G,
+            137V,
+            138G,
+            <b>
+            139K,
+            </b>
+            140T
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-46"
+      class="match             cdd
+ uni
+"
+      style="left:  30.2832244009%;
+              width: 0.2178649237%;"
+      title="T 140 - 140" >
+</span>
+        <div id="residue-popup-46" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    140T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker A motif</b>
+            <br/>
+            134G,
+            135A,
+            136G,
+            137V,
+            138G,
+            139K,
+            <b>
+            140T
+            </b>
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+                                    <span class="grade" style="left:0%;" title="0"></span>
+                                    <span class="grade" style="left:10.893%;" title="50"></span>
+                                    <span class="grade" style="left:21.786%;" title="100"></span>
+                                    <span class="grade" style="left:32.68%;" title="150"></span>
+                                    <span class="grade" style="left:43.573%;" title="200"></span>
+                                    <span class="grade" style="left:54.466%;" title="250"></span>
+                                    <span class="grade" style="left:65.359%;" title="300"></span>
+                                    <span class="grade" style="left:76.253%;" title="350"></span>
+                                    <span class="grade" style="left:87.146%;" title="400"></span>
+                                    <span class="grade" style="left:100%;" title="459"></span>
+
+                            </div>
+                            </div>
+                            </li>
+                            <li class="signature">
+                                <div class="bot-row-signame">
+                                            <span title="ATP binding site cd01133">ATP binding site c...</span>
+                                </div>
+                                <div class="bot-row-line">
+                            <div class="matches">
+
+
+
+
+<span id="residue-span-47"
+      class="match             cdd
+ uni
+"
+      style="left:  29.4117647059%;
+              width: 0.2178649237%;"
+      title="G 136 - 136" >
+</span>
+        <div id="residue-popup-47" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    136G
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            <b>
+            136G,
+            </b>
+            139K,
+            140T,
+            141V,
+            165E,
+            166R,
+            169E,
+            234D,
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-48"
+      class="match             cdd
+ uni
+"
+      style="left:  30.0653594771%;
+              width: 0.2178649237%;"
+      title="K 139 - 139" >
+</span>
+        <div id="residue-popup-48" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    139K
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            <b>
+            139K,
+            </b>
+            140T,
+            141V,
+            165E,
+            166R,
+            169E,
+            234D,
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-49"
+      class="match             cdd
+ uni
+"
+      style="left:  30.2832244009%;
+              width: 0.2178649237%;"
+      title="T 140 - 140" >
+</span>
+        <div id="residue-popup-49" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    140T
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            <b>
+            140T,
+            </b>
+            141V,
+            165E,
+            166R,
+            169E,
+            234D,
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-50"
+      class="match             cdd
+ uni
+"
+      style="left:  30.5010893246%;
+              width: 0.2178649237%;"
+      title="V 141 - 141" >
+</span>
+        <div id="residue-popup-50" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    141V
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            <b>
+            141V,
+            </b>
+            165E,
+            166R,
+            169E,
+            234D,
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-51"
+      class="match             cdd
+ uni
+"
+      style="left:  35.7298474946%;
+              width: 0.2178649237%;"
+      title="E 165 - 165" >
+</span>
+        <div id="residue-popup-51" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    165E
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            141V,
+            <b>
+            165E,
+            </b>
+            166R,
+            169E,
+            234D,
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-52"
+      class="match             cdd
+ uni
+"
+      style="left:  35.9477124183%;
+              width: 0.2178649237%;"
+      title="R 166 - 166" >
+</span>
+        <div id="residue-popup-52" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    166R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            141V,
+            165E,
+            <b>
+            166R,
+            </b>
+            169E,
+            234D,
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-53"
+      class="match             cdd
+ uni
+"
+      style="left:  36.6013071895%;
+              width: 0.2178649237%;"
+      title="E 169 - 169" >
+</span>
+        <div id="residue-popup-53" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    169E
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            141V,
+            165E,
+            166R,
+            <b>
+            169E,
+            </b>
+            234D,
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-54"
+      class="match             cdd
+ uni
+"
+      style="left:  50.7625272331%;
+              width: 0.2178649237%;"
+      title="D 234 - 234" >
+</span>
+        <div id="residue-popup-54" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    234D
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            141V,
+            165E,
+            166R,
+            169E,
+            <b>
+            234D,
+            </b>
+            238R,
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-55"
+      class="match             cdd
+ uni
+"
+      style="left:  51.6339869281%;
+              width: 0.2178649237%;"
+      title="R 238 - 238" >
+</span>
+        <div id="residue-popup-55" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    238R
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            141V,
+            165E,
+            166R,
+            169E,
+            234D,
+            <b>
+            238R,
+            </b>
+            322I,
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-56"
+      class="match             cdd
+ uni
+"
+      style="left:  69.9346405229%;
+              width: 0.2178649237%;"
+      title="I 322 - 322" >
+</span>
+        <div id="residue-popup-56" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    322I
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            141V,
+            165E,
+            166R,
+            169E,
+            234D,
+            238R,
+            <b>
+            322I,
+            </b>
+            323Y
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-57"
+      class="match             cdd
+ uni
+"
+      style="left:  70.1525054466%;
+              width: 0.2178649237%;"
+      title="Y 323 - 323" >
+</span>
+        <div id="residue-popup-57" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    323Y
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>ATP binding site</b>
+            <br/>
+            136G,
+            139K,
+            140T,
+            141V,
+            165E,
+            166R,
+            169E,
+            234D,
+            238R,
+            322I,
+            <b>
+            323Y
+            </b>
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+                                    <span class="grade" style="left:0%;" title="0"></span>
+                                    <span class="grade" style="left:10.893%;" title="50"></span>
+                                    <span class="grade" style="left:21.786%;" title="100"></span>
+                                    <span class="grade" style="left:32.68%;" title="150"></span>
+                                    <span class="grade" style="left:43.573%;" title="200"></span>
+                                    <span class="grade" style="left:54.466%;" title="250"></span>
+                                    <span class="grade" style="left:65.359%;" title="300"></span>
+                                    <span class="grade" style="left:76.253%;" title="350"></span>
+                                    <span class="grade" style="left:87.146%;" title="400"></span>
+                                    <span class="grade" style="left:100%;" title="459"></span>
+
+                            </div>
+                            </div>
+                            </li>
+                            <li class="signature">
+                                <div class="bot-row-signame">
+                                            <span title="Walker B motif cd01133">Walker B motif cd0...</span>
+                                </div>
+                                <div class="bot-row-line">
+                            <div class="matches">
+
+
+
+
+<span id="residue-span-58"
+      class="match             cdd
+ uni
+"
+      style="left:  49.8910675381%;
+              width: 0.2178649237%;"
+      title="L 230 - 230" >
+</span>
+        <div id="residue-popup-58" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    230L
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker B motif</b>
+            <br/>
+            <b>
+            230L,
+            </b>
+            231L,
+            232F,
+            233I,
+            234D
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-59"
+      class="match             cdd
+ uni
+"
+      style="left:  50.1089324619%;
+              width: 0.2178649237%;"
+      title="L 231 - 231" >
+</span>
+        <div id="residue-popup-59" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    231L
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker B motif</b>
+            <br/>
+            230L,
+            <b>
+            231L,
+            </b>
+            232F,
+            233I,
+            234D
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-60"
+      class="match             cdd
+ uni
+"
+      style="left:  50.3267973856%;
+              width: 0.2178649237%;"
+      title="F 232 - 232" >
+</span>
+        <div id="residue-popup-60" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    232F
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker B motif</b>
+            <br/>
+            230L,
+            231L,
+            <b>
+            232F,
+            </b>
+            233I,
+            234D
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-61"
+      class="match             cdd
+ uni
+"
+      style="left:  50.5446623094%;
+              width: 0.2178649237%;"
+      title="I 233 - 233" >
+</span>
+        <div id="residue-popup-61" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    233I
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker B motif</b>
+            <br/>
+            230L,
+            231L,
+            232F,
+            <b>
+            233I,
+            </b>
+            234D
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-62"
+      class="match             cdd
+ uni
+"
+      style="left:  50.7625272331%;
+              width: 0.2178649237%;"
+      title="D 234 - 234" >
+</span>
+        <div id="residue-popup-62" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    234D
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>Walker B motif</b>
+            <br/>
+            230L,
+            231L,
+            232F,
+            233I,
+            <b>
+            234D
+            </b>
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+                                    <span class="grade" style="left:0%;" title="0"></span>
+                                    <span class="grade" style="left:10.893%;" title="50"></span>
+                                    <span class="grade" style="left:21.786%;" title="100"></span>
+                                    <span class="grade" style="left:32.68%;" title="150"></span>
+                                    <span class="grade" style="left:43.573%;" title="200"></span>
+                                    <span class="grade" style="left:54.466%;" title="250"></span>
+                                    <span class="grade" style="left:65.359%;" title="300"></span>
+                                    <span class="grade" style="left:76.253%;" title="350"></span>
+                                    <span class="grade" style="left:87.146%;" title="400"></span>
+                                    <span class="grade" style="left:100%;" title="459"></span>
+
+                            </div>
+                            </div>
+                            </li>
+                            <li class="signature">
+                                <div class="bot-row-signame">
+                                            <span title="inhibitor binding site cd01133">inhibitor binding ...</span>
+                                </div>
+                                <div class="bot-row-line">
+                            <div class="matches">
+
+
+
+
+<span id="residue-span-63"
+      class="match             cdd
+ uni
+"
+      style="left:  69.4989106754%;
+              width: 0.2178649237%;"
+      title="K 320 - 320" >
+</span>
+        <div id="residue-popup-63" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    320K
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>inhibitor binding site</b>
+            <br/>
+            <b>
+            320K,
+            </b>
+            322I,
+            328P,
+            329L
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-64"
+      class="match             cdd
+ uni
+"
+      style="left:  69.9346405229%;
+              width: 0.2178649237%;"
+      title="I 322 - 322" >
+</span>
+        <div id="residue-popup-64" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    322I
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>inhibitor binding site</b>
+            <br/>
+            320K,
+            <b>
+            322I,
+            </b>
+            328P,
+            329L
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-65"
+      class="match             cdd
+ uni
+"
+      style="left:  71.2418300654%;
+              width: 0.2178649237%;"
+      title="P 328 - 328" >
+</span>
+        <div id="residue-popup-65" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    328P
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>inhibitor binding site</b>
+            <br/>
+            320K,
+            322I,
+            <b>
+            328P,
+            </b>
+            329L
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+
+
+
+<span id="residue-span-66"
+      class="match             cdd
+ uni
+"
+      style="left:  71.4596949891%;
+              width: 0.2178649237%;"
+      title="L 329 - 329" >
+</span>
+        <div id="residue-popup-66" style="display: none;">
+        <div class="popup_topl">
+            <span class="            cdd
+ uni
+ caption_puce"></span>
+    329L
+        </div>
+    <div class="popup_botl" style="font-size:88%;">
+            <b>inhibitor binding site</b>
+            <br/>
+            320K,
+            322I,
+            328P,
+            <b>
+            329L
+            </b>
+        <br/>
+        <b>CDD</b> <abbr class="icon icon-generic" data-icon="i" title="CDD is a protein annotation resource that consists of a collection of well-annotated multiple sequence alignment models for ancient domains and full-length proteins."></abbr> <br/>
+        <a href='http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=cd01133' class="ext">cd01133 </a>
+        <span>(F1-ATPase_beta)</span>
+        </div>
+    </div>
+
+
+
+                                    <span class="grade" style="left:0%;" title="0"></span>
+                                    <span class="grade" style="left:10.893%;" title="50"></span>
+                                    <span class="grade" style="left:21.786%;" title="100"></span>
+                                    <span class="grade" style="left:32.68%;" title="150"></span>
+                                    <span class="grade" style="left:43.573%;" title="200"></span>
+                                    <span class="grade" style="left:54.466%;" title="250"></span>
+                                    <span class="grade" style="left:65.359%;" title="300"></span>
+                                    <span class="grade" style="left:76.253%;" title="350"></span>
+                                    <span class="grade" style="left:87.146%;" title="400"></span>
+                                    <span class="grade" style="left:100%;" title="459"></span>
+
+                            </div>
+                            </div>
+                            </li>
+                    </ol>
+                    <div class="bot-row-line-bot"></div>
+                </div>
+
+            </div>
+            </div>
+
+
+
+<h3>GO term prediction</h3>
+
+<div class="prot_go">
+
+    <div class="go_terms">
+        <h4>Biological Process</h4>
+        <div class="go_terms_box">
+
+            <p>
+            <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0015986"
+                   class="ext">GO:0015986</a> ATP synthesis coupled proton transport
+                <br/>
+            
+            <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0046034"
+                   class="ext">GO:0046034</a> ATP metabolic process
+                <br/>
+            
+            <a href="http://www.ebi.ac.uk/QuickGO/term/GO:1902600"
+                   class="ext">GO:1902600</a> proton transmembrane transport
+                <br/>
+            </p>
+        </div>
+
+        <h4>Molecular Function</h4>
+        <div class="go_terms_box">
+
+        <p>
+              <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0005524"
+                   class="ext">GO:0005524</a> ATP binding
+                <br/>
+            
+              <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0046933"
+                   class="ext">GO:0046933</a> proton-transporting ATP synthase activity, rotational mechanism
+                <br/>
+            </p>
+        </div>
+
+        <h4>Cellular Component</h4>
+        <div class="go_terms_box">
+
+        <p>
+                <a href="http://www.ebi.ac.uk/QuickGO/term/GO:0045261"
+                   class="ext">GO:0045261</a> proton-transporting ATP synthase complex, catalytic core F(1)
+                <br/>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+            // Use hidden DIVs to display popups
+            $('span[id*="span-"]').each(
+                    function(i) {
+                            preparePopup(this.id, 3);
+                    }
+            );
+    });
+</script>
+
+        </div>
+    </div>
+
+
+</div>
+
+    <div class="grid_19 omega main-content"><i>Generated with InterProScan 5.32-71.0</i></div>
+</div>
+</body>
+</html>
